@@ -1,0 +1,214 @@
+---
+title: 'INFO201 Problem Set: Rmarkdown and plotting'
+author: "Anika Razdan"
+date: "2/17/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+#Call libraries
+library(ggplot2)
+library(data.table)
+library(dplyr)
+
+#Set working directory 
+setwd("/Users/stlp/Documents/INFO201/")
+
+#Turn off scientific notation 
+options(scipen=999)
+```
+
+# 1 Load and Check data 
+
+**1. A new markdown file has been created with an appropriate title.**
+
+**2. Load data.**
+```{r echo=FALSE, results='hide'}
+#Read in data 
+dir <- "/Users/stlp/Documents/INFO201/INFO-201/"
+df <- read.csv(paste0(dir,"gapminderdata.csv"))
+dim(df)
+```
+
+We have 13,055 rows and 25 columns. 
+
+
+**3. Print a small sample of the data.**
+```{r echo=FALSE}
+head(df,5)
+```
+
+
+# 2 Descriptive statistics 
+
+**1. How many countries are there in the dataset?**
+```{r echo=FALSE, results='hide'}
+length(unique(df$name))
+length(unique(df$iso2))
+length(unique(df$iso3))
+```
+
+There are 250 countries for *names*, 249 countries for *iso2*, and 253 countries for *iso3*. 
+
+
+**2. Why are there more names than iso-2 codes and even more iso3-codes?**
+a. 
+
+
+
+
+**3. Minimum and maximum year in the data**
+```{r echo=FALSE, results='hide'}
+min(df$time, na.rm = TRUE)
+max(df$time, na.rm = TRUE)
+```
+
+The minimum year is 1960 and the maximum year is 2019. 
+
+
+
+# 3 CO2 emissions
+
+**1. Analyze CO2 data**
+```{r echo=FALSE}
+df %>% group_by(time) %>% 
+  summarise(co2_na = sum(is.na(co2)),
+            co2_PC_na = sum(is.na(co2_PC))) %>% 
+  print(n = 1e3)
+```
+
+The years 2017, 2018, and 2019 have the most missing data for *co2* and *co2_PC*. 
+
+
+
+**2. Plot total CO2 emissions over time for US, China, India, and countries of choice**
+
+```{r echo=FALSE}
+df %>% filter(name==c("United States of America", "China", "India", "Uruguay", "France")) %>%
+       ggplot(aes(x=time, y=co2, color=name)) + geom_point() + geom_line() +
+          xlab("Year") + ylab("CO2 Emissions") + guides(color=guide_legend(title="Countries"))
+```
+
+
+
+**3. Plot total CO2 emissions per capita over time for US, China, India, and countries of choice**
+
+```{r echo=FALSE}
+df %>% filter(name==c("United States of America", "China", "India", "Uruguay", "France")) %>%
+       ggplot(aes(x=time, y=co2_PC, color=name)) + geom_point() + geom_line() +
+          xlab("Year") + ylab("CO2 Emissions Per Capita") + guides(color=guide_legend(title="Countries"))
+```
+
+
+
+**4. Average CO2 emissions per capita across the continents **
+
+```{r echo=FALSE}
+df %>% group_by(region, time) %>% filter(region!="") %>%
+  summarise(co2_PC_avg = mean(co2_PC, na.rm=TRUE)) %>% 
+  print(n = 1e3)
+```
+
+
+**5. Barplot for average CO2 emissions per capita across continents in 1960 and 2016**
+
+```{r echo=FALSE}
+df %>% filter(time==c(1960, 2016) & region!="") %>% 
+  group_by(region, time) %>% 
+  summarise(co2_PC_avg = mean(co2_PC, na.rm=TRUE)) %>%
+  ggplot(aes(x=region, y=co2_PC_avg, fill=factor(time))) + geom_bar(position="dodge", stat="identity") +
+  xlab("Continent") + ylab("Average CO2 per capita") + guides(fill=guide_legend(title="Year"))
+
+```
+
+
+**6. Answer this **
+
+
+
+
+
+
+# 4 GDP per capita
+
+**1. Scatterplot of GDP per capita vs. life expectancy by country in 1960**
+```{r echo=FALSE}
+df %>% filter(time==1960 & region!="") %>%
+  ggplot(aes(x=GDP_PC, y=lifeExpectancy,color=region, size=totalPopulation)) + geom_point() + 
+  xlab("GDP per capita") + ylab("Life Expectancy") + scale_size(guide="none") +
+  guides(color=guide_legend(title="Continent")) +
+  ggtitle("GDP per capita vs. life expectancy by country in 1960")
+```
+
+
+**2. Scatterplot of GDP per capita vs. life expectancy by country in 1960**
+```{r echo=FALSE}
+df %>% filter(time==2019 & region!="") %>%
+  ggplot(aes(x=GDP_PC, y=lifeExpectancy,color=region, size=totalPopulation)) + geom_point() + 
+  xlab("GDP per capita") + ylab("Life Expectancy") + scale_size(guide="none") +
+  guides(color=guide_legend(title="Continent")) +
+  ggtitle("GDP per capita vs. life expectancy by country in 2019")
+```
+
+
+
+**3. Compare plots**
+
+
+**4. Average life expectancy for each continent in 1960 and 2019**
+```{r echo=FALSE}
+df %>% filter(time==c(1960, 2016) & region!="") %>% 
+  group_by(region, time) %>% 
+  summarise(lifeExpectancy_avg = mean(lifeExpectancy, na.rm=TRUE)) %>%
+  arrange(time)
+```
+
+**5. Compute average LE growht frmo 1960-2019 across continents**
+```{r echo=FALSE}
+df %>% group_by(region) %>% filter(region!="") %>%
+  mutate(lifeExpectancy_prev = lag(lifeExpectancy), #Create a lag where we shift LE down by 1 year
+         lifeExpectancy_growth = lifeExpectancy - lifeExpectancy_prev) %>% #Calculate the growth by subtracting LE - LE_prev
+  summarise(lifeExpectancy_growth_avg = mean(lifeExpectancy_growth, na.rm=TRUE)) #take the average of LE_growth 
+```
+
+
+
+
+
+**6. Histogram of GDP per capita for years 1960 and 2019**
+```{r echo=FALSE}
+df %>% filter(time==c(1960, 2019)) %>%
+  ggplot(aes(x=GDP_PC, fill=factor(time), color=factor(time))) + geom_histogram(alpha=0.4,colour = "black",
+                 lwd = 0.75,
+                 linetype = 1,) + 
+  guides(fill=guide_legend(title="Year")) + xlab("GDP per capita")
+```
+
+
+**6. Histogram of GDP per capita for years 1960 and 2019**
+```{r echo=FALSE}
+df %>% filter(time==c(1960, 2019)) %>%
+  ggplot(aes(x=GDP_PC, fill=factor(time), color=factor(time))) + geom_histogram(alpha=0.4,colour = "black",
+                 lwd = 0.75,
+                 linetype = 1,) + 
+  guides(fill=guide_legend(title="Year")) + xlab("GDP per capita")
+```
+
+
+
+**7. Ranking of US in terms of life expectancy in 1960 and 2019**
+```{r echo=FALSE}
+df %>% filter(time==1960 & name!="") %>%
+  mutate(rank=rank(desc(lifeExpectancy))) %>% filter(name == "United States of America") %>% select(name, rank)
+
+df %>% filter(time==2019 & name!="") %>%
+  mutate(rank=rank(desc(lifeExpectancy))) %>% filter(name == "United States of America") %>% select(name, rank)
+```
+
+**8. Relative rank**
+```{r}
+df %>% filter(time==1960 & name!="") %>%
+  mutate(rank=rank(desc(lifeExpectancy))) %>% summarize(max_rank=max(rank))
+```
+
