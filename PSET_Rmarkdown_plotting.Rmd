@@ -5,7 +5,7 @@ date: "2/17/2023"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 #Call libraries
 library(ggplot2)
@@ -24,7 +24,7 @@ options(scipen=999)
 **1. A new markdown file has been created with an appropriate title.**
 
 **2. Load data.**
-```{r echo=FALSE, results='hide'}
+```{r echo=FALSE}
 #Read in data 
 dir <- "/Users/stlp/Documents/INFO201/INFO-201/"
 df <- read.csv(paste0(dir,"gapminderdata.csv"))
@@ -44,7 +44,7 @@ head(df,5)
 # 2 Descriptive statistics 
 
 **1. How many countries are there in the dataset?**
-```{r echo=FALSE, results='hide'}
+```{r echo=FALSE}
 length(unique(df$name))
 length(unique(df$iso2))
 length(unique(df$iso3))
@@ -79,7 +79,7 @@ df %>%
 
 
 **3. Minimum and maximum year in the data**
-```{r echo=FALSE, results='hide'}
+```{r echo=FALSE}
 min(df$time, na.rm = TRUE)
 max(df$time, na.rm = TRUE)
 ```
@@ -110,6 +110,8 @@ df %>% filter(name==c("United States of America", "China", "India", "Uruguay", "
           xlab("Year") + ylab("CO2 Emissions") + guides(color=guide_legend(title="Countries"))
 ```
 
+*China* has the highest CO2 emissions compared to all other four other countries, and *USA* comes second. 
+
 
 
 **3. Plot total CO2 emissions per capita over time for US, China, India, and countries of choice**
@@ -120,6 +122,8 @@ df %>% filter(name==c("United States of America", "China", "India", "Uruguay", "
           xlab("Year") + ylab("CO2 Emissions Per Capita") + guides(color=guide_legend(title="Countries"))
 ```
 
+The highest CO2 emissions per capita seem to be *USA* and *France*, which is different than the total CO2 emissions overall.
+
 
 
 **4. Average CO2 emissions per capita across the continents **
@@ -129,6 +133,9 @@ df %>% group_by(region, time) %>% filter(region!="") %>%
   summarise(co2_PC_avg = mean(co2_PC, na.rm=TRUE)) %>% 
   print(n = 1e3)
 ```
+
+There are lots of countries across continents with high avg CO2 emissions per capita across continents. 
+
 
 
 **5. Barplot for average CO2 emissions per capita across continents in 1960 and 2016**
@@ -161,6 +168,9 @@ df %>% filter(time==1960 & region!="") %>%
   ggtitle("GDP per capita vs. life expectancy by country in 1960")
 ```
 
+**Europe** has the highest GDP and life expectancy per capita overall compared to the other four countries. 
+
+
 
 **2. Scatterplot of GDP per capita vs. life expectancy by country in 1960**
 ```{r echo=FALSE}
@@ -174,8 +184,8 @@ df %>% filter(time==2019 & region!="") %>%
 
 
 **3. Compare plots**
-The trendline for 1960 vs 2019 seems to be in the same shape, and the countries 
-are plotting the same points and shape of curve overall.
+
+The trendline for 1960 vs 2019 seems to be in the same shape, and the countries are plotting the same points and shape of curve overall.
 
 
 
@@ -187,6 +197,10 @@ df %>% filter(time==c(1960, 2016) & region!="") %>%
   arrange(time)
 ```
 
+Yes, the results do fit with what I saw on the figures. 
+
+
+
 **5. Compute average LE growht frmo 1960-2019 across continents**
 ```{r echo=FALSE}
 df %>% group_by(region) %>% filter(region!="") %>%
@@ -195,16 +209,7 @@ df %>% group_by(region) %>% filter(region!="") %>%
   summarise(lifeExpectancy_growth_avg = mean(lifeExpectancy_growth, na.rm=TRUE)) #take the average of LE_growth 
 ```
 
-
-
-**6. Histogram of GDP per capita for years 1960 and 2019**
-```{r echo=FALSE}
-df %>% filter(time==c(1960, 2019)) %>%
-  ggplot(aes(x=GDP_PC, fill=factor(time), color=factor(time))) + geom_histogram(alpha=0.4,colour = "black",
-                 lwd = 0.75,
-                 linetype = 1,) + 
-  guides(fill=guide_legend(title="Year")) + xlab("GDP per capita")
-```
+The life expectancy growth for the America's seems to be the highest compared to other countries analyzed.
 
 
 
@@ -228,11 +233,19 @@ df %>% filter(time==2019 & name!="") %>%
   mutate(rank=rank(desc(lifeExpectancy))) %>% filter(name == "United States of America") %>% select(name, rank)
 ```
 
+The ranking of the US was *46* in terms of life expectancy 
+
 
 
 **8. Relative rank**
-```{r}
+```{r echo=FALSE}
 df %>% filter(time==1960 & name!="") %>%
   mutate(rank=rank(desc(lifeExpectancy))) %>% summarize(max_rank=max(rank))
 ```
 
+
+
+
+**9. Hours Spent on the Practice Set**
+
+I spent about *8* hours on the practice set. 
